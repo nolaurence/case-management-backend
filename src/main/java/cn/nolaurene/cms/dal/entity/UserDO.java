@@ -43,7 +43,7 @@ public class UserDO {
      * 性别
      */
     @Column("gender")
-    private Byte gender;
+    private Integer gender;
 
     /**
      * 密码
@@ -85,7 +85,7 @@ public class UserDO {
      * 是否删除
      */
     @Column("is_delete")
-    private Byte isDelete;
+    private Boolean isDelete;
 
     /**
      * 用户角色 0 - 普通用户 1 - 管理员
