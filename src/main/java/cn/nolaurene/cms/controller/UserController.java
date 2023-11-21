@@ -8,6 +8,7 @@ import cn.nolaurene.cms.common.vo.User;
 import cn.nolaurene.cms.exception.BusinessException;
 import cn.nolaurene.cms.service.UserLoginService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import static cn.nolaurene.cms.common.constants.UserConstants.USER_LOGIN_STATE;
 
 @RestController
+@Tag(name = "User API")
 @RequestMapping("/user")
 public class UserController {
 

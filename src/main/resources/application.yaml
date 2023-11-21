@@ -12,3 +12,7 @@ spring:
     timeout: 86400
 server:
   port: 7001
+
+springdoc:
+  show-actuator: true
+  show-springfox: false
