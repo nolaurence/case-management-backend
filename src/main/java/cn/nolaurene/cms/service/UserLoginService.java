@@ -1,6 +1,7 @@
 package cn.nolaurene.cms.service;
 
 import cn.nolaurene.cms.common.constants.UserConstants;
+import cn.nolaurene.cms.common.enums.ErrorCode;
 import cn.nolaurene.cms.common.enums.LoginErrorEnum;
 import cn.nolaurene.cms.common.vo.User;
 import cn.nolaurene.cms.dal.entity.UserDO;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class UserLoginService {
 
-    private static String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+    private static final String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
 
     /**
      * 盐值，混淆密码
@@ -32,6 +33,51 @@ public class UserLoginService {
 
     @Resource
     UserMapper userMapper;
+
+    public long register(String username, String password, String checkPassword) {
+        // 1. 参数校验
+        if (StringUtils.isAnyBlank(username, password, checkPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "参数为空");
+        }
+        if (username.length() < 4) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "用户账号果断");
+        }
+        if (password.length() < 8 || checkPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "用户密码过短");
+        }
+
+        // 不能包含特殊字符
+        Matcher matcher = Pattern.compile(validPattern).matcher(username);
+        if (matcher.find()) {
+            return -1;
+        }
+
+        // 密码和校验密码相同
+        if (!password.equals(checkPassword)) {
+            return -1;
+        }
+
+        // 账户不能重复
+        UserDO userDO = new UserDO();
+        userDO.setUserAccount(username);
+        Optional<UserDO> userDO1 = userMapper.selectOne(userDO);
+        if (userDO1.isPresent()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "行号重复");
+        }
+
+        // 2. 加密
+        String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+
+        // 3. 写数据库
+        userDO.setUserAccount(username);
+        userDO.setUserPassword(encryptedPassword);
+
+        int i = userMapper.insertSelective(userDO);
+        if (i <= 0) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR.getCode(), "注册失败");
+        }
+        return userDO.getId();
+    }
 
     public User login(String userAccount, String password, HttpServletRequest httpServletRequest) {
         // 1. 校验参数
@@ -63,6 +109,12 @@ public class UserLoginService {
         // 种cookie
         httpServletRequest.getSession().setAttribute(UserConstants.USER_LOGIN_STATE, userInfoToReturn);
         return userInfoToReturn;
+    }
+
+    public int logout(HttpServletRequest httpServletRequest) {
+        // 移除登录态
+        httpServletRequest.getSession().removeAttribute(UserConstants.USER_LOGIN_STATE);
+        return 0;
     }
 
     private LoginErrorEnum checkAccount(String userAccount) {
