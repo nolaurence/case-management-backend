@@ -1,6 +1,8 @@
 # 测试用例管理平台-be
 # test case management platform backend
 
+前端 ( frontend repo ) : https://github.com/nolaurence/case-management-frontend
+
 ### 项目介绍
 1. 支持xmind类型的测试用例在线编写
 2. 测试模块和用例分离
@@ -22,8 +24,8 @@
 
 
 ### 具体开发的milestone
-[x] 完成用户登录相关功能  
-[ ] xmind 前端技术预研  
-[ ] xmind 管理的相关功能开发  
-[ ] 角色权限管理功能
-[ ] 测试用例权限管理
+- [x] 完成用户登录相关功能  
+- [ ] xmind 前端技术预研  
+- [ ] xmind 管理的相关功能开发  
+- [ ] 角色权限管理功能
+- [ ] 测试用例权限管理
