@@ -92,10 +92,4 @@ public class UserDO {
      */
     @Column("user_role")
     private Integer userRole;
-
-    /**
-     * 星球编号
-     */
-    @Column("planet_code")
-    private String planetCode;
 }

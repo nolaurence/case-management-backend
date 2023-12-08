@@ -44,8 +44,8 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "用户登录")
-    public User userLogin(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        return userLoginService.login(loginRequest.getUserName(), loginRequest.getPassword(), request);
+    public BaseWebResult<User> userLogin(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        return BaseWebResult.success(userLoginService.login(loginRequest.getUsername(), loginRequest.getPassword(), request));
     }
 
     @GetMapping("/logout")
