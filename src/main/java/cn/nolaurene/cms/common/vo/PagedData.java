@@ -1,0 +1,14 @@
+package cn.nolaurene.cms.common.vo;
+
+import cn.nolaurene.cms.common.dto.Pagination;
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class PagedData<T> {
+
+    private List<T> data;
+
+    private Pagination pagination;
+}

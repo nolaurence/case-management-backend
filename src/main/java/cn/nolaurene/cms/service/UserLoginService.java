@@ -1,22 +1,28 @@
 package cn.nolaurene.cms.service;
 
 import cn.nolaurene.cms.common.constants.UserConstants;
+import cn.nolaurene.cms.common.dto.Pagination;
+import cn.nolaurene.cms.common.dto.UserSearchRequest;
 import cn.nolaurene.cms.common.enums.ErrorCode;
+import cn.nolaurene.cms.common.enums.user.Gender;
 import cn.nolaurene.cms.common.enums.LoginErrorEnum;
+import cn.nolaurene.cms.common.vo.PagedData;
 import cn.nolaurene.cms.common.vo.User;
 import cn.nolaurene.cms.dal.entity.UserDO;
 import cn.nolaurene.cms.dal.mapper.UserMapper;
 import cn.nolaurene.cms.exception.BusinessException;
 import io.mybatis.mapper.example.Example;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -104,17 +110,68 @@ public class UserLoginService {
         }
 
         // 3. 用户脱敏：模型转换
-        User userInfoToReturn = getSafetyUser(userDO1.get());
+        User userToReturn = getSafetyUser(userDO1.get());
 
         // 种cookie
-        httpServletRequest.getSession().setAttribute(UserConstants.USER_LOGIN_STATE, userInfoToReturn);
-        return userInfoToReturn;
+        httpServletRequest.getSession().setAttribute(UserConstants.USER_LOGIN_STATE, userToReturn);
+        return userToReturn;
     }
 
     public int logout(HttpServletRequest httpServletRequest) {
         // 移除登录态
         httpServletRequest.getSession().removeAttribute(UserConstants.USER_LOGIN_STATE);
         return 0;
+    }
+
+    public User getById(Long id) {
+
+        // 查询用户是否存在
+        UserDO userDO = new UserDO();
+        userDO.setId(id);
+        userDO.setIsDelete(false);
+
+        Optional<UserDO> userDO1 = userMapper.selectOne(userDO);
+        if (userDO1.isEmpty()) {
+            throw new BusinessException(LoginErrorEnum.USER_NOT_EXIST.getErrorCode(), LoginErrorEnum.USER_NOT_EXIST.getErrorMessage());
+        }
+
+        // 用户脱敏：模型转换
+        return getSafetyUser(userDO1.get());
+    }
+
+    public PagedData<User> searchPagedUser(UserSearchRequest request) {
+        // 查询条件
+        Example<UserDO> example = new Example<>();
+        Example.Criteria<UserDO> criteria = example.createCriteria();
+        if (StringUtils.isNoneBlank(request.getAccount())) {
+            criteria.andLike(UserDO::getUserAccount, "%" + request.getAccount() + "%");
+        }
+        if (StringUtils.isNotBlank(request.getName())) {
+            criteria.andLike(UserDO::getUserName, "%" + request.getName() + "%");
+        }
+        if (ObjectUtils.isNotEmpty(request.getUserid())) {
+            criteria.andEqualTo(UserDO::getId, request.getUserid());
+        }
+        criteria.andEqualTo(UserDO::getIsDelete, false);
+        example.orderBy(UserDO::getUpdateTime, Example.Order.DESC);
+
+        // 执行
+        int offset = (request.getCurrent() - 1) * request.getPageSize();
+        new RowBounds(offset, request.getPageSize());
+        List<UserDO> userDOList = userMapper.selectByExample(example);
+        long count = userMapper.countByExample(example);
+
+        // 模型转换 + 分页参数准备
+        List<User> userList = userDOList.stream().map(this::getSafetyUser).collect(java.util.stream.Collectors.toList());
+        Pagination pagination = new Pagination();
+        pagination.setCurrent(request.getCurrent());
+        pagination.setPageSize(request.getPageSize());
+        pagination.setTotal(count);
+        PagedData<User> userPagedData = new PagedData<>();
+        userPagedData.setPagination(pagination);
+        userPagedData.setData(userList);
+
+        return userPagedData;
     }
 
     private LoginErrorEnum checkAccount(String userAccount) {
@@ -133,15 +190,40 @@ public class UserLoginService {
 
     private User getSafetyUser(UserDO userDO) {
         User user = new User();
-        user.setUserName(userDO.getUserName());
-        user.setAvatarUrl(userDO.getAvatarUrl());
-        user.setGender(userDO.getGender());
+        user.setName(userDO.getUserName());
+        user.setAvatar(userDO.getAvatarUrl());
         user.setPhone(userDO.getPhone());
         user.setEmail(userDO.getEmail());
-//        user.setUserId(userDO.getId());
-        user.setUserAccount(userDO.getUserAccount());
-        user.setUserRole(userDO.getUserRole());
-//        user.setPlanetCode(userDO.getPlanetCode());
+        user.setAccount(userDO.getUserAccount());
+        user.setRole(userDO.getUserRole());
+        user.setUserid(userDO.getId());
+
+        if (null != userDO.getUserRole()) {
+            switch (userDO.getUserRole()) {
+                case 1:
+                    user.setAccess("canAdmin");
+                    break;
+                case 2:
+                    user.setAccess("user");
+                    break;
+                default:
+                    user.setAccess("user");
+                    break;
+            }
+        }
+
+        if (null != userDO.getGender()) {
+            switch (Gender.getByCode(userDO.getGender())) {
+                case MALE:
+                    user.setGender(Gender.MALE.getDesc());
+                    break;
+                case FEMALE:
+                    user.setGender(Gender.FEMALE.getDesc());
+                    break;
+                default:
+                    break;
+            }
+        }
         return user;
     }
 

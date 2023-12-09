@@ -2,8 +2,10 @@ package cn.nolaurene.cms.controller;
 
 import cn.nolaurene.cms.common.dto.LoginRequest;
 import cn.nolaurene.cms.common.dto.RegisterRequest;
+import cn.nolaurene.cms.common.dto.UserSearchRequest;
 import cn.nolaurene.cms.common.enums.ErrorCode;
 import cn.nolaurene.cms.common.vo.BaseWebResult;
+import cn.nolaurene.cms.common.vo.PagedData;
 import cn.nolaurene.cms.common.vo.User;
 import cn.nolaurene.cms.exception.BusinessException;
 import cn.nolaurene.cms.service.UserLoginService;
@@ -18,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import static cn.nolaurene.cms.common.constants.UserConstants.USER_LOGIN_STATE;
 
 @RestController
-@Tag(name = "User API")
+@Tag(name = "用户API")
 @RequestMapping("/user")
 public class UserController {
 
@@ -26,6 +28,7 @@ public class UserController {
     UserLoginService userLoginService;
 
     @PostMapping("/register")
+    @Operation(summary = "用户注册")
     public BaseWebResult<Long> userRegister(@RequestBody RegisterRequest registerRequest) {
         // 校验
         if (null == registerRequest || StringUtils.isAnyBlank(
@@ -49,6 +52,7 @@ public class UserController {
     }
 
     @GetMapping("/logout")
+    @Operation(summary = "用户登出")
     public BaseWebResult userLogout(HttpServletRequest request) {
         if (null == request) {
             throw new BusinessException(ErrorCode.NOT_LOGIN.getCode(), ErrorCode.NOT_LOGIN.getMessage());
@@ -57,17 +61,24 @@ public class UserController {
         return BaseWebResult.success(result);
     }
 
-//    /**
-//     * 获取当前用户
-//     */
-//    @GetMapping("/current")
-//    public BaseWebResult<User> getCurrentUser(HttpServletRequest request) {
-//        User currentUserInfo = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-//
-//        if (null == currentUserInfo) {
-//            throw new BusinessException(ErrorCode.NOT_LOGIN.getCode(), ErrorCode.NOT_LOGIN.getMessage());
-//        }
-//        long userId = currentUserInfo.getUserAccount();
-//    }
+    /**
+     * 获取当前用户
+     */
+    @GetMapping("/current")
+    @Operation(summary = "获取当前用户")
+    public BaseWebResult<User> getCurrentUser(HttpServletRequest request) {
+        User currentUser = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
 
+        if (null == currentUser) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN.getCode(), ErrorCode.NOT_LOGIN.getMessage());
+        }
+        User userFromDb = userLoginService.getById(currentUser.getUserid());
+        return BaseWebResult.success(userFromDb);
+    }
+
+    @PostMapping("/search/paged")
+    @Operation(summary = "分页查询用户")
+    public BaseWebResult<PagedData<User>> searchUserPaged(@RequestBody UserSearchRequest request) {
+        return BaseWebResult.success(userLoginService.searchPagedUser(request));
+    }
 }
