@@ -9,7 +9,7 @@ public class UserSearchRequest {
 
     private String name;
 
-    private long userid;
+    private Long userid;
 
     private int current;
 

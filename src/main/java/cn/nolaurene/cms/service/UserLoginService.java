@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.NumberUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -149,11 +150,11 @@ public class UserLoginService {
         if (StringUtils.isNotBlank(request.getName())) {
             criteria.andLike(UserDO::getUserName, "%" + request.getName() + "%");
         }
-        if (ObjectUtils.isNotEmpty(request.getUserid())) {
+        if (request.getUserid() != null) {
             criteria.andEqualTo(UserDO::getId, request.getUserid());
         }
         criteria.andEqualTo(UserDO::getIsDelete, false);
-        example.orderBy(UserDO::getUpdateTime, Example.Order.DESC);
+        example.orderBy(UserDO::getGmtModified, Example.Order.DESC);
 
         // 执行
         int offset = (request.getCurrent() - 1) * request.getPageSize();
@@ -169,7 +170,7 @@ public class UserLoginService {
         pagination.setTotal(count);
         PagedData<User> userPagedData = new PagedData<>();
         userPagedData.setPagination(pagination);
-        userPagedData.setData(userList);
+        userPagedData.setList(userList);
 
         return userPagedData;
     }

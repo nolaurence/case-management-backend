@@ -72,14 +72,14 @@ public class UserDO {
     /**
      * 创建时间
      */
-    @Column("create_time")
-    private Date createTime;
+    @Column("gmt_create")
+    private Date gmtCreate;
 
     /**
      * 更新时间
      */
-    @Column("update_time")
-    private Date updateTime;
+    @Column("gmt_modified")
+    private Date gmtModified;
 
     /**
      * 是否删除

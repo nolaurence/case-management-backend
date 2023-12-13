@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class PagedData<T> {
 
-    private List<T> data;
+    private List<T> list;
 
     private Pagination pagination;
 }
