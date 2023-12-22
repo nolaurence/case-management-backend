@@ -32,15 +32,13 @@ public class UserController {
     public BaseWebResult<Long> userRegister(@RequestBody RegisterRequest registerRequest) {
         // 校验
         if (null == registerRequest || StringUtils.isAnyBlank(
-                registerRequest.getUserName(),
+                registerRequest.getAccount(),
                 registerRequest.getPassword(),
-                registerRequest.getCheckPassword())) {
+                registerRequest.getCheckPassword(),
+                registerRequest.getName())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), ErrorCode.PARAMS_ERROR.getMessage());
         }
-        long userId = userLoginService.register(
-                registerRequest.getUserName(),
-                registerRequest.getPassword(),
-                registerRequest.getCheckPassword());
+        long userId = userLoginService.register(registerRequest);
 
         return BaseWebResult.success(userId);
     }
@@ -48,7 +46,7 @@ public class UserController {
     @PostMapping("/login")
     @Operation(summary = "用户登录")
     public BaseWebResult<User> userLogin(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        return BaseWebResult.success(userLoginService.login(loginRequest.getUsername(), loginRequest.getPassword(), request));
+        return BaseWebResult.success(userLoginService.login(loginRequest.getAccount(), loginRequest.getPassword(), request));
     }
 
     @GetMapping("/logout")

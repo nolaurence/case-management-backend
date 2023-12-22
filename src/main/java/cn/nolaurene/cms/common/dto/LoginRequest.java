@@ -10,7 +10,7 @@ public class LoginRequest {
     /**
      * 账号
      */
-    private String username;
+    private String account;
 
     /**
      * 密码

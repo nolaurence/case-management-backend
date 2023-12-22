@@ -1,10 +1,13 @@
 package cn.nolaurene.cms.service;
 
 import cn.nolaurene.cms.common.constants.UserConstants;
+import cn.nolaurene.cms.common.dto.LoginRequest;
 import cn.nolaurene.cms.common.dto.Pagination;
+import cn.nolaurene.cms.common.dto.RegisterRequest;
 import cn.nolaurene.cms.common.dto.UserSearchRequest;
 import cn.nolaurene.cms.common.enums.ErrorCode;
 import cn.nolaurene.cms.common.enums.user.Gender;
+import cn.nolaurene.cms.common.enums.user.UserRole;
 import cn.nolaurene.cms.common.enums.LoginErrorEnum;
 import cn.nolaurene.cms.common.vo.PagedData;
 import cn.nolaurene.cms.common.vo.User;
@@ -41,43 +44,48 @@ public class UserLoginService {
     @Resource
     UserMapper userMapper;
 
-    public long register(String username, String password, String checkPassword) {
+    public long register(RegisterRequest request) {
         // 1. 参数校验
-        if (StringUtils.isAnyBlank(username, password, checkPassword)) {
+        if (StringUtils.isAnyBlank(request.getAccount(), request.getPassword(), request.getCheckPassword())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "参数为空");
         }
-        if (username.length() < 4) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "用户账号果断");
+        if (request.getAccount().length() < 4) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "账号过段");
         }
-        if (password.length() < 8 || checkPassword.length() < 8) {
+        if (request.getPassword().length() < 8 || request.getCheckPassword().length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "用户密码过短");
         }
 
         // 不能包含特殊字符
-        Matcher matcher = Pattern.compile(validPattern).matcher(username);
+        Matcher matcher = Pattern.compile(validPattern).matcher(request.getAccount());
         if (matcher.find()) {
             return -1;
         }
 
         // 密码和校验密码相同
-        if (!password.equals(checkPassword)) {
+        if (!request.getPassword().equals(request.getCheckPassword())) {
             return -1;
         }
 
         // 账户不能重复
         UserDO userDO = new UserDO();
-        userDO.setUserAccount(username);
+        userDO.setUserAccount(request.getAccount());
         Optional<UserDO> userDO1 = userMapper.selectOne(userDO);
         if (userDO1.isPresent()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "行号重复");
         }
 
         // 2. 加密
-        String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + request.getPassword()).getBytes());
 
         // 3. 写数据库
-        userDO.setUserAccount(username);
+        userDO.setUserAccount(request.getAccount());
         userDO.setUserPassword(encryptedPassword);
+        userDO.setUserName(request.getName());
+        userDO.setGender(request.getGender());
+        userDO.setPhone(request.getPhone());
+        userDO.setEmail(request.getEmail());
+        userDO.setUserRole(UserRole.USER.getCode());
 
         int i = userMapper.insertSelective(userDO);
         if (i <= 0) {
@@ -150,7 +158,7 @@ public class UserLoginService {
         if (StringUtils.isNotBlank(request.getName())) {
             criteria.andLike(UserDO::getUserName, "%" + request.getName() + "%");
         }
-        if (request.getUserid() != null) {
+        if (ObjectUtils.isNotEmpty(request.getUserid())) {
             criteria.andEqualTo(UserDO::getId, request.getUserid());
         }
         criteria.andEqualTo(UserDO::getIsDelete, false);

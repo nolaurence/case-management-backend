@@ -8,7 +8,12 @@ public class RegisterRequest {
     /**
      * 用户账号
      */
-    private String userName;
+    private String account;
+
+    /**
+     * name
+     */
+    private String name;
 
     /**
      * 密码
@@ -19,4 +24,10 @@ public class RegisterRequest {
      * 校验密码
      */
     private String checkPassword;
+
+    private Integer gender;
+
+    private String email;
+
+    private String phone;
 }
