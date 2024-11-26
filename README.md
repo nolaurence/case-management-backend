@@ -7,7 +7,7 @@
 1. 支持xmind类型的测试用例在线编写
 2. 测试模块和用例分离
 3. 角色登录以及权限相关
-4. （in design）用例的权限管理
+4. 用例的权限管理
 
 ### Project intro
 1. support xmind type test case online edit
@@ -18,6 +18,10 @@
 
 ### 当前的开发进度
 * 完成了角色登录，登出，注销相关功能
+* 完成了xmind的前端构建，并且增删改查同步后端存储
+
+### 注意事项
+本工程冗余了一些私有工程中的代码，后期会进行剔除处理~~
 
 ### Current development progress
 * complete role login, logout, logout function
