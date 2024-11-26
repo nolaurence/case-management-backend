@@ -22,12 +22,19 @@
 ### Current development progress
 * complete role login, logout, logout function
 
+### Credit
+
+前端工程基于wangling2/mind-map构建：https://github.com/wanglin2/mind-map
+
 
 ### 具体开发的milestone
 - [x] 完成用户登录相关功能  
 - [x] xmind 前端技术预研  
-- [ ] xmind 管理的相关功能开发  
-- [ ] xmind 功能开发
-- [ ] xmind 后端存储设计 + 开发
+- [x] xmind 管理的相关功能开发  
+- [x] xmind 功能开发
+- [x] xmind 后端存储设计 + 开发
 - [ ] 角色权限管理功能
 - [ ] 测试用例权限管理
+- [ ] 图片上传模块
+- [ ] 标签管理模块
+- [ ] url管理模块
