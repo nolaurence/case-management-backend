@@ -19,12 +19,15 @@
 ### 当前的开发进度
 * 完成了角色登录，登出，注销相关功能
 * 完成了xmind的前端构建，并且增删改查同步后端存储
+* 基础的测试项目管理功能
 
 ### 注意事项
 本工程冗余了一些私有工程中的代码，后期会进行剔除处理~~
 
 ### Current development progress
-* complete role login, logout, logout function
+* basic login, logout with role manage features
+* xmind based test case writing and management with backend persistent storage
+* basic test program management features
 
 ### Credit
 
