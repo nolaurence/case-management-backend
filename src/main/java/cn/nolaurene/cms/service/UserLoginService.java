@@ -30,6 +30,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static cn.nolaurene.cms.common.constants.UserConstants.USER_LOGIN_STATE;
+
 @Service
 @Slf4j
 public class UserLoginService {
@@ -115,7 +117,7 @@ public class UserLoginService {
 
         Optional<UserDO> userDO1 = userMapper.selectOne(userDO);
         if (userDO1.isEmpty()) {
-            throw new BusinessException(LoginErrorEnum.USER_NOT_EXIST.getErrorCode(), LoginErrorEnum.USER_NOT_EXIST.getErrorMessage());
+            throw new BusinessException(LoginErrorEnum.PASSWORD_ERROR.getErrorCode(), LoginErrorEnum.PASSWORD_ERROR.getErrorMessage());
         }
 
         // 3. 用户脱敏：模型转换
@@ -181,6 +183,15 @@ public class UserLoginService {
         userPagedData.setList(userList);
 
         return userPagedData;
+    }
+
+    public User getCurrentUserInfo(HttpServletRequest httpServletRequest) {
+        User currentUser = (User) httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+
+        if (null == currentUser) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN.getCode(), ErrorCode.NOT_LOGIN.getMessage());
+        }
+        return getById(currentUser.getUserid());
     }
 
     private LoginErrorEnum checkAccount(String userAccount) {

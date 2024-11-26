@@ -11,6 +11,7 @@ import cn.nolaurene.cms.exception.BusinessException;
 import cn.nolaurene.cms.service.UserLoginService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,12 +66,11 @@ public class UserController {
     @GetMapping("/current")
     @Operation(summary = "获取当前用户")
     public BaseWebResult<User> getCurrentUser(HttpServletRequest request) {
-        User currentUser = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        User userFromDb = userLoginService.getCurrentUserInfo(request);
 
-        if (null == currentUser) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN.getCode(), ErrorCode.NOT_LOGIN.getMessage());
+        if (ObjectUtils.isEmpty(userFromDb)) {
+            return BaseWebResult.fail("获取失败：该用户不存在");
         }
-        User userFromDb = userLoginService.getById(currentUser.getUserid());
         return BaseWebResult.success(userFromDb);
     }
 

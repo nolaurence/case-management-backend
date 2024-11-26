@@ -58,4 +58,8 @@ public class BaseWebResult<T> {
     public static <T> BaseWebResult fail(String message) {
         return new BaseWebResult(false, null, "", message, null);
     }
+
+    public static <T> BaseWebResult fail(String message, ErrorShowType errorShowType) {
+        return new BaseWebResult(false, null, "", message, errorShowType);
+    }
 }

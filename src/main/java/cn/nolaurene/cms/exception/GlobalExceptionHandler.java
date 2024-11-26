@@ -13,13 +13,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public BaseWebResult<?> businessExceptionHandler(BusinessException e) {
         log.error("businessException: " + e.getMessage(), e);
-        BaseWebResult result = new BaseWebResult(false, null, e.getCode(), e.getMessage(), ErrorShowType.ERROR_MESSAGE);
+        BaseWebResult result = new BaseWebResult(false, null, e.getCode(), e.getMessage(), ErrorShowType.NOTIFICATION);
         return result;
     }
 
     @ExceptionHandler(RuntimeException.class)
     public BaseWebResult<?> runtimeExceptionHandler(RuntimeException e) {
         log.error("runtimeException", e);
-        return BaseWebResult.fail(e.getMessage());
+        return BaseWebResult.fail(e.getMessage(), ErrorShowType.NOTIFICATION);
     }
 }
